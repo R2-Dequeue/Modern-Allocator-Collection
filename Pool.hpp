@@ -7,6 +7,8 @@
 #include <new>			// operator new[], operator delete[]
 #include <memory>		// std::unique_ptr
 
+#include "Memory.hpp"
+
 namespace cdp
 {
 	template <typename T>
@@ -36,7 +38,6 @@ namespace cdp
 		}
 
 	private:
-		// cdp::uninitialized_delete or cdp::operator_delete would be useful
 		std::unique_ptr<T[], cdp::operator_delete<T[]>>		buffer;
 		const std::size_t									pool_size;
 		std::size_t											allocated;
