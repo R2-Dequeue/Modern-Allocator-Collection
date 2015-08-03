@@ -12,8 +12,30 @@
 
 #include "ReferenceAllocator.hpp"
 
+/// Simple test using std::vector
 template <typename allocator_type, typename Container>
-void test1(const Container& c1, const Container& c2)
+void test1(const Container& c)
+{
+	using value_type = std::allocator_traits<allocator_type>::value_type;
+
+	try
+	{
+		const std::vector<value_type, allocator_type> v(c.cbegin(), c.cend(), allocator_type{ c.size() });
+
+		if (std::equal(v.cbegin(), v.cend(), c.cbegin(), c.cend()))
+			std::clog << "test1 succeeded: std::vector correctly initialized." << std::endl;
+		else
+			std::clog << "test1 failed: std::vector elements not equal to input." << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::clog << "test1 failed: An exception was thrown: " << e.what() << std::endl;
+	}
+}
+
+/// Simple test using std::set to test rebinding and node allocation
+template <typename allocator_type, typename Container>
+void test2(const Container& c1, const Container& c2)
 {
 	using value_type = std::allocator_traits<allocator_type>::value_type;
 
@@ -21,17 +43,15 @@ void test1(const Container& c1, const Container& c2)
 	{
 		const std::set<value_type, std::less<value_type>, allocator_type>
 			tree(c1.cbegin(), c1.cend(), std::less<value_type>{}, allocator_type{ c1.size() });
-		/*const std::set<value_type, std::less<value_type>, allocator_type>
-			tree(c1.cbegin(), c1.cend(), allocator_type{ c1.size() });*/
 
 		if (std::equal(tree.cbegin(), tree.cend(), c2.cbegin(), c2.cend()))
-			std::clog << "test1 succeeded: Sorting worked correctly!" << std::endl;
+			std::clog << "test2 succeeded: Sorting worked correctly." << std::endl;
 		else
-			std::clog << "test1 succeeded: Sorting failed to work correctly." << std::endl;
+			std::clog << "test2 failed: Sorting failed to work correctly." << std::endl;
 	}
 	catch (const std::exception& e)
 	{
-		std::clog << "test1 failed: An exception was thrown: " << e.what() << std::endl;
+		std::clog << "test2 failed: An exception was thrown: " << e.what() << std::endl;
 	}
 }
 
@@ -50,7 +70,9 @@ int main()
 	auto last = std::unique(unique_sorted_numbers2.begin(), unique_sorted_numbers2.end());
 	unique_sorted_numbers2.erase(last, unique_sorted_numbers2.end());
 
-	test1<allocator_type>(numbers, unique_sorted_numbers);
+	test1<allocator_type>(numbers);
+	test1<allocator_type>(unique_sorted_numbers);
+	test2<allocator_type>(numbers, unique_sorted_numbers);
 	
 	return 0;
 }
