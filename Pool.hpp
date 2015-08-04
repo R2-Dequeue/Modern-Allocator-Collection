@@ -1,41 +1,44 @@
 #pragma once
 
-#include <cstddef>		// std::size_t
-
 #include <cassert>		// assert
+#include <cstddef>		// std::size_t
 
 #include <new>			// operator new[], operator delete[]
 #include <memory>		// std::unique_ptr
+#include <limits>		// std::numeric_limits
 
 #include "Memory.hpp"
 
 namespace cdp
 {
 	template <typename T>
-	class Pool
+	class HeapPool
 	{
 	public:
 		using value_type = T;
 
 		/// Default constructor
-		Pool() = delete;
+		HeapPool() = delete;
 		/// Copy constructor
-		Pool(const Pool& original) = delete;
+		HeapPool(const HeapPool& original) = delete;
 		/// Move constructor
-		Pool(Pool&& original) = default;
+		HeapPool(HeapPool&& original) = default;
 		/// Destructor
-		~Pool() = default;
+		~HeapPool() = default;
 
 		/// Copy assignment operator
-		Pool& operator = (const Pool& rhs) = delete;
+		HeapPool& operator = (const HeapPool& rhs) = delete;
 		/// Move assignment operator
-		Pool& operator = (Pool&& rhs) = default;
+		HeapPool& operator = (HeapPool&& rhs) = default;
 
 		/// Main constructor
-		Pool(const std::size_t n) : buffer{ ::operator new[](sizeof(T)*n) }, pool_size{ n }, allocated{ 0 }
+		HeapPool(const std::size_t n) : buffer{ ::operator new[](sizeof(T)*n) }, pool_size{ n }, allocated{ 0 }
 		{
-			assert(n > 0);
+			assert(0 < n && n <= std::numeric_limits<std::size_t>::max()/sizeof(T));
 		}
+
+		T* allocate(const std::size_t n);
+		void deallocate(T* const p, std::size_t) const noexcept;
 
 	private:
 		std::unique_ptr<T[], cdp::operator_delete<T[]>>		buffer;
@@ -46,8 +49,8 @@ namespace cdp
 	template <typename T, std::size_t N>
 	class StackPool
 	{
-		static_assert(N > 0, "");
-		static_assert(N <= std::numeric_limits<std::size_t>::max()/sizeof(T), "");
+		static_assert(N > 0, "Some stack memory must be reserved");
+		static_assert(N <= std::numeric_limits<std::size_t>::max()/sizeof(T), "The amonut of memory requested is too large");
 
 	public:
 		using value_type = T;
@@ -67,19 +70,45 @@ namespace cdp
 		/// Move assignment operator
 		StackPool& operator = (StackPool&& rhs) = default;
 
-		T& operator [] (const std::size_t i) noexcept
-		{
-			assert(0 <= i && i < N);
-
-			return buffer[i];
-		}
+		T* allocate(const std::size_t n);
+		void deallocate(T* const p, std::size_t) const noexcept;
 
 	private:
 		union
 		{
 			byte			stack_buffer[sizeof(T)*N];
 			T				buffer[];
-		}
+		};
 		std::size_t			allocated;
 	};
+
+	// DEFINITIONS
+
+	template <typename T>
+	T* HeapPool<T>::allocate(const std::size_t n)
+	{
+		assert(n > 0 && allocated + n <= pool_size);
+
+		const auto index = allocated;
+		allocated += n;
+
+		return buffer + index;
+	}
+
+	template <typename T>
+	void HeapPool<T>::deallocate(T* const p, std::size_t) const noexcept {}
+
+	template <typename T, std::size_t N>
+	T* StackPool<T>::allocate(const std::size_t n)
+	{
+		assert(n > 0 && allocated + n <= N);
+
+		const auto index = allocated;
+		allocated += n;
+
+		return buffer + index;
+	}
+	
+	template <typename T, std::size_t N>
+	void StackPool<T>::deallocate(T* const p, std::size_t) const noexcept {}
 }
