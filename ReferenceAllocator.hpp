@@ -4,6 +4,7 @@
 
 #include <new>			// std::bad_array_new_length
 #include <limits>		// std::numeric_limits
+#include <type_traits>	// std::is_const
 
 namespace cdp
 {
@@ -13,6 +14,8 @@ namespace cdp
 	template <typename T>
 	class ReferenceAllocator
 	{
+		static_assert(!std::is_const<T>::value, "Allocated type must be non-const (17.6.3.5/2)");
+
 	public:
 		using value_type = T;
 
