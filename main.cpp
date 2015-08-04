@@ -9,6 +9,8 @@
 #include <random>		// std::random_device, std::default_random_engine, std::uniform_int_distribution
 #include <iterator>		// std::back_inserter
 #include <memory>		// std::allocator_traits
+#include <utility>		// std::move
+#include <type_traits>	// std::is_copy_constructible, std::is_move_constructible
 
 #include "ReferenceAllocator.hpp"
 
@@ -55,6 +57,54 @@ void test2(const Container& c1, const Container& c2)
 	}
 }
 
+/// MoveConstructible test using std::vector
+template <typename allocator_type, typename Container>
+void test3(const Container& c)
+{
+	static_assert(std::is_move_constructible<allocator_type>::value, "Allocators must satisfy the MoveConstructible template argument requirements (17.6.3.5/5 and 17.6.3.1 Tables 20-21)");
+
+	using value_type = std::allocator_traits<allocator_type>::value_type;
+
+	try
+	{
+		std::vector<value_type, allocator_type> v(c.cbegin(), c.cend(), allocator_type{ c.size() });
+		const std::vector<value_type, allocator_type> moved_v = std::move(v);
+
+		if (std::equal(moved_v.cbegin(), moved_v.cend(), c.cbegin(), c.cend()))
+			std::clog << "test3 succeeded: std::vector correctly moved." << std::endl;
+		else
+			std::clog << "test3 failed: std::vector elements not equal to input." << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::clog << "test3 failed: An exception was thrown: " << e.what() << std::endl;
+	}
+}
+
+/// CopyConstructible test using std::vector
+template <typename allocator_type, typename Container>
+void test4(const Container& c)
+{
+	static_assert(std::is_copy_constructible<allocator_type>::value, "Allocators must satisfy the CopyConstructible template argument requirements (17.6.3.5/5)");
+	
+	using value_type = std::allocator_traits<allocator_type>::value_type;
+
+	try
+	{
+		const std::vector<value_type, allocator_type> v(c.cbegin(), c.cend(), allocator_type{ c.size() });
+		const std::vector<value_type, allocator_type> copy_of_v = v;
+
+		if (std::equal(v.cbegin(), v.cend(), c.cbegin(), c.cend()) && std::equal(copy_of_v.cbegin(), copy_of_v.cend(), c.cbegin(), c.cend()))
+			std::clog << "test4 succeeded: std::vector correctly copied." << std::endl;
+		else
+			std::clog << "test4 failed: std::vector elements not equal to input." << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::clog << "test4 failed: An exception was thrown: " << e.what() << std::endl;
+	}
+}
+
 /// Crude early tests
 int main()
 {
@@ -73,6 +123,10 @@ int main()
 	test1<allocator_type>(numbers);
 	test1<allocator_type>(unique_sorted_numbers);
 	test2<allocator_type>(numbers, unique_sorted_numbers);
+	test3<allocator_type>(numbers);
+	test3<allocator_type>(unique_sorted_numbers);
+	test4<allocator_type>(numbers);
+	test4<allocator_type>(unique_sorted_numbers);
 	
 	return 0;
 }
