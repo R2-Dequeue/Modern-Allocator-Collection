@@ -50,14 +50,14 @@ namespace cdp
 	class StackPool
 	{
 		static_assert(N > 0, "Some stack memory must be reserved");
-		static_assert(N <= std::numeric_limits<std::size_t>::max()/sizeof(T), "The amonut of memory requested is too large");
+		static_assert(N <= std::numeric_limits<std::size_t>::max()/sizeof(T), "The amount of memory requested is too large");
 
 	public:
 		using value_type = T;
 		using byte = unsigned char;
 
 		/// Default constructor
-		StackPool() : allocated{ 0 } {};
+		StackPool() noexcept;
 		/// Copy constructor
 		StackPool(const StackPool& original) = delete;
 		/// Move constructor
@@ -76,18 +76,20 @@ namespace cdp
 	private:
 		union
 		{
-			byte			stack_buffer[sizeof(T)*N];
-			T				buffer[];
+			byte		stack_buffer[sizeof(T)*N];
+			T			buffer[];
 		};
-		std::size_t			allocated;
+		std::size_t		allocated;
 	};
 
 	// DEFINITIONS
 
+	// HeapPool
+
 	template <typename T>
 	T* HeapPool<T>::allocate(const std::size_t n)
 	{
-		assert(n > 0 && allocated + n <= pool_size);
+		assert(n > 0 && n + allocated <= pool_size);
 
 		const auto index = allocated;
 		allocated += n;
@@ -98,10 +100,15 @@ namespace cdp
 	template <typename T>
 	void HeapPool<T>::deallocate(T* const p, std::size_t) const noexcept {}
 
+	// StackPool
+
+	template <typename T, std::size_t N>
+	StackPool<T>::StackPool() noexcept : allocated{ 0 } {};
+
 	template <typename T, std::size_t N>
 	T* StackPool<T>::allocate(const std::size_t n)
 	{
-		assert(n > 0 && allocated + n <= N);
+		assert(n > 0 && n + allocated <= N);
 
 		const auto index = allocated;
 		allocated += n;
