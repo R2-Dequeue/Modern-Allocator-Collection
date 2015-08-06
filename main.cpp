@@ -1,5 +1,5 @@
 #include <cstddef>		// std::size_t
-#include <iostream>		// std::clog, std::endl
+#include <iostream>		// std::cout, std::endl
 
 #include <vector>
 #include <set>
@@ -26,13 +26,13 @@ void test1(const Container& c)
 		const std::vector<value_type, allocator_type> v(c.cbegin(), c.cend(), allocator_type{ c.size() });
 
 		if (std::equal(v.cbegin(), v.cend(), c.cbegin(), c.cend()))
-			std::clog << "test1 succeeded: std::vector correctly initialized." << std::endl;
+			std::cout << "test1 succeeded: std::vector correctly initialized." << std::endl;
 		else
-			std::clog << "test1 failed: std::vector elements not equal to input." << std::endl;
+			std::cout << "test1 failed: std::vector elements not equal to input." << std::endl;
 	}
 	catch (const std::exception& e)
 	{
-		std::clog << "test1 failed: An exception was thrown: " << e.what() << std::endl;
+		std::cout << "test1 failed: An exception was thrown: " << e.what() << std::endl;
 	}
 }
 
@@ -48,13 +48,13 @@ void test2(const Container& c1, const Container& c2)
 			tree(c1.cbegin(), c1.cend(), std::less<value_type>{}, allocator_type{ c1.size() });
 
 		if (std::equal(tree.cbegin(), tree.cend(), c2.cbegin(), c2.cend()))
-			std::clog << "test2 succeeded: Sorting worked correctly." << std::endl;
+			std::cout << "test2 succeeded: Sorting worked correctly." << std::endl;
 		else
-			std::clog << "test2 failed: Sorting failed to work correctly." << std::endl;
+			std::cout << "test2 failed: Sorting failed to work correctly." << std::endl;
 	}
 	catch (const std::exception& e)
 	{
-		std::clog << "test2 failed: An exception was thrown: " << e.what() << std::endl;
+		std::cout << "test2 failed: An exception was thrown: " << e.what() << std::endl;
 	}
 }
 
@@ -72,13 +72,13 @@ void test3(const Container& c)
 		const std::vector<value_type, allocator_type> moved_v = std::move(v);
 
 		if (std::equal(moved_v.cbegin(), moved_v.cend(), c.cbegin(), c.cend()))
-			std::clog << "test3 succeeded: std::vector correctly moved." << std::endl;
+			std::cout << "test3 succeeded: std::vector correctly moved." << std::endl;
 		else
-			std::clog << "test3 failed: std::vector elements not equal to input." << std::endl;
+			std::cout << "test3 failed: std::vector elements not equal to input." << std::endl;
 	}
 	catch (const std::exception& e)
 	{
-		std::clog << "test3 failed: An exception was thrown: " << e.what() << std::endl;
+		std::cout << "test3 failed: An exception was thrown: " << e.what() << std::endl;
 	}
 }
 
@@ -96,13 +96,13 @@ void test4(const Container& c)
 		const std::vector<value_type, allocator_type> copy_of_v = v;
 
 		if (std::equal(v.cbegin(), v.cend(), c.cbegin(), c.cend()) && std::equal(copy_of_v.cbegin(), copy_of_v.cend(), c.cbegin(), c.cend()))
-			std::clog << "test4 succeeded: std::vector correctly copied." << std::endl;
+			std::cout << "test4 succeeded: std::vector correctly copied." << std::endl;
 		else
-			std::clog << "test4 failed: std::vector elements not equal to input." << std::endl;
+			std::cout << "test4 failed: std::vector elements not equal to input." << std::endl;
 	}
 	catch (const std::exception& e)
 	{
-		std::clog << "test4 failed: An exception was thrown: " << e.what() << std::endl;
+		std::cout << "test4 failed: An exception was thrown: " << e.what() << std::endl;
 	}
 }
 
