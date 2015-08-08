@@ -1,0 +1,3 @@
+[submodule "is_complete"]
+	path = is_complete
+	url = https://github.com/R2-Dequeue/is_complete.git
