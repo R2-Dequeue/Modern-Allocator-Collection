@@ -6,6 +6,8 @@
 #include <limits>		// std::numeric_limits
 #include <type_traits>	// std::is_const
 
+#include "is_complete/type_traits.hpp"
+
 namespace cdp
 {
 	// Allocator requirements: 17.6.3.5
@@ -14,6 +16,7 @@ namespace cdp
 	template <typename T>
 	class ReferenceAllocator
 	{
+		static_assert(cdp::is_complete<T>(), "Allocated type must be complete");
 		static_assert(!std::is_const<T>::value, "Allocated type must be non-const (17.6.3.5/2)");
 
 	public:
