@@ -9,6 +9,7 @@
 
 #include "Memory.hpp"	// cdp::operator_delete
 
+/// My default namespace
 namespace cdp
 {
 	template <typename T>
@@ -32,12 +33,11 @@ namespace cdp
 		HeapPool& operator = (HeapPool&& rhs) = default;
 
 		/// Main constructor
-		HeapPool(const std::size_t n) : buffer{ ::operator new[](sizeof(T)*n) }, pool_size{ n }, allocated{ 0 }
-		{
-			assert(0 < n && n <= std::numeric_limits<std::size_t>::max()/sizeof(T));
-		}
+		HeapPool(const std::size_t n);
 
+		/// Allocates memory for \p n objects of type \p T and returns a pointer to the first
 		T* allocate(const std::size_t n) noexcept;
+		/// Deallocates memory previously allocated with a call to \code allocate \endcode
 		void deallocate(T* const p, std::size_t) const noexcept;
 
 	private:
@@ -85,6 +85,12 @@ namespace cdp
 	// DEFINITIONS
 
 	// HeapPool
+
+	template <typename T>
+	HeapPool<T>::HeapPool(const std::size_t n) : buffer{ ::operator new[](sizeof(T)*n) }, pool_size{ n }, allocated{ 0 }
+	{
+		assert(0 < n && n <= std::numeric_limits<std::size_t>::max() / sizeof(T));
+	}
 
 	template <typename T>
 	T* HeapPool<T>::allocate(const std::size_t n) noexcept

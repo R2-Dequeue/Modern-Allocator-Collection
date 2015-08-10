@@ -2,10 +2,12 @@
 
 #include <new>		// operator delete, operator delete[]
 
+/// My default namespace
 namespace cdp
 {
 	// Default deleters: 20.8.1.1
 
+	/// A replacement for \code std::defaulte_delete \endcode that frees memory allocated with \code ::operator new \endcode
 	template <typename T>
 	class operator_delete
 	{
@@ -21,6 +23,7 @@ namespace cdp
 		}
 	};
 
+	/// A replacement for \code std::defaulte_delete \endcode that frees memory allocated with \code ::operator new[] \endcode
 	template <typename T>
 	class operator_delete<T[]>
 	{
