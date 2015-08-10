@@ -7,7 +7,7 @@
 #include <memory>		// std::unique_ptr
 #include <limits>		// std::numeric_limits
 
-#include "Memory.hpp"
+#include "Memory.hpp"	// cdp::operator_delete
 
 namespace cdp
 {
@@ -37,7 +37,7 @@ namespace cdp
 			assert(0 < n && n <= std::numeric_limits<std::size_t>::max()/sizeof(T));
 		}
 
-		T* allocate(const std::size_t n);
+		T* allocate(const std::size_t n) noexcept;
 		void deallocate(T* const p, std::size_t) const noexcept;
 
 	private:
@@ -61,23 +61,23 @@ namespace cdp
 		/// Copy constructor
 		StackPool(const StackPool& original) = delete;
 		/// Move constructor
-		StackPool(StackPool&& original) = default;
+		StackPool(StackPool&& original) = delete;
 		/// Destructor
 		~StackPool() = default;
 
 		/// Copy assignment operator
 		StackPool& operator = (const StackPool& rhs) = delete;
 		/// Move assignment operator
-		StackPool& operator = (StackPool&& rhs) = default;
+		StackPool& operator = (StackPool&& rhs) = delete;
 
-		T* allocate(const std::size_t n);
+		T* allocate(const std::size_t n) noexcept;
 		void deallocate(T* const p, std::size_t) const noexcept;
 
 	private:
 		union
 		{
 			byte		stack_buffer[sizeof(T)*N];
-			T			buffer[];
+			T			buffer[0];
 		};
 		std::size_t		allocated;
 	};
@@ -87,7 +87,7 @@ namespace cdp
 	// HeapPool
 
 	template <typename T>
-	T* HeapPool<T>::allocate(const std::size_t n)
+	T* HeapPool<T>::allocate(const std::size_t n) noexcept
 	{
 		assert(n > 0 && n + allocated <= pool_size);
 
@@ -106,7 +106,7 @@ namespace cdp
 	StackPool<T>::StackPool() noexcept : allocated{ 0 } {};
 
 	template <typename T, std::size_t N>
-	T* StackPool<T>::allocate(const std::size_t n)
+	T* StackPool<T>::allocate(const std::size_t n) noexcept
 	{
 		assert(n > 0 && n + allocated <= N);
 
