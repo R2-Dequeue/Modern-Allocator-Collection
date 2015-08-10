@@ -8,7 +8,7 @@
 
 #include "is_complete/type_traits.hpp"
 
-/// My default namespace
+/// Default namespace
 namespace cdp
 {
 	// Allocator requirements: 17.6.3.5
@@ -41,7 +41,7 @@ namespace cdp
 		template <typename U>
 		ReferenceAllocator(const ReferenceAllocator<U>& original) noexcept {}
 
-		/// Allocates memory for \p n objects of type \p T and returns a pointer to the first
+		/// Allocates memory for \p n objects of type \p T and returns a pointer to the first object
 		T* allocate(const std::size_t n) const
 		{
 			if (n > std::numeric_limits<std::size_t>::max()/sizeof(T))
@@ -50,7 +50,7 @@ namespace cdp
 			// 18.6.1.1/3 and 18.6.1.2: returns properly-aligned pointer, throws std::bad_alloc on error
 			return static_cast<T*>(::operator new[](sizeof(T)*n));
 		}
-		/// Deallocates memory previously allocated with a call to \code allocate \endcode
+		/// Deallocates memory previously allocated with a call to <tt> allocate </tt>
 		void deallocate(T* const p, std::size_t) const noexcept
 		{
 			::operator delete[](p); // 18.6.1.2: doesn't throw

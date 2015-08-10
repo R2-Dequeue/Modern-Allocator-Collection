@@ -9,7 +9,7 @@
 
 #include "Memory.hpp"	// cdp::operator_delete
 
-/// My default namespace
+/// Default namespace
 namespace cdp
 {
 	template <typename T>
@@ -35,9 +35,9 @@ namespace cdp
 		/// Main constructor
 		HeapPool(const std::size_t n);
 
-		/// Allocates memory for \p n objects of type \p T and returns a pointer to the first
+		/// Allocates memory for \p n objects of type \p T and returns a pointer to the first object
 		T* allocate(const std::size_t n) noexcept;
-		/// Deallocates memory previously allocated with a call to \code allocate \endcode
+		/// Deallocates memory previously allocated with a call to <tt> allocate </tt>
 		void deallocate(T* const p, std::size_t) const noexcept;
 
 	private:
@@ -70,7 +70,9 @@ namespace cdp
 		/// Move assignment operator
 		StackPool& operator = (StackPool&& rhs) = delete;
 
+		/// Allocates memory for \p n objects of type \p T and returns a pointer to the first object
 		T* allocate(const std::size_t n) noexcept;
+		/// Deallocates memory previously allocated with a call to <tt> allocate </tt>
 		void deallocate(T* const p, std::size_t) const noexcept;
 
 	private:
